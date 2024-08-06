@@ -1,19 +1,24 @@
 <!DOCTYPE html>
 <html>
   <head>
+
     <meta charset="UTF-8">
     <title>Scenario App</title>
   </head>
+
   <body>
-    <div>
-        <h1>My Team Members</h1>
-        <br>
-        <ol>
-            <li>266</li>
-            <li>237</li>
-            <li>064</li>
-            <li>221</li>
-        </ol>
-    </div>
+    <h1>シナリオ生成</h1>
+    <hr>
+    <form method="POST" action="{% url 'index' %}">
+      {% csrf_token %}
+      <input type="text" name="job" placeholder="なりたい職業" maxlength="10">
+      <input type="text" name="mbti" placeholder="あなたのMBTI" maxlength="5">
+      <button type="submit">シナリオを生成する</button>
+    </form>
+    {% if user_scenario %}
+      <h3>あなたのシナリオ</h3>
+      <p>{{ user_scenario }}</p>
+    {% endif %}
   </body>
+
 </html>

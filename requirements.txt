@@ -1,3 +1,6 @@
 Django
 psycopg2-binary
 uvicorn
+langchain
+openai
+langchain_community
