@@ -9,16 +9,82 @@
   <body>
     <h1>シナリオ生成</h1>
     <hr>
+    <div id="quiz">
+      <form method="post" action="{% url 'index' %}">
+        {% csrf_token %}
+        <div id="q1">
+          <p>週末はどう過ごす？<br>
+            <input type="radio" name="q1-1" value="E" {% if selected.q1_1 == 'E' %}checked{% endif %}>友達と遊びに行く！<br>
+            <input type="radio" name="q1-1" value="I" {% if selected.q1_2 == 'I' %}checked{% endif %}>一人で趣味に没頭する！<br>
+          </p>
+          <p>放課後や仕事終わりにあなたは...<br>
+            <input type="radio" name="q1-2" value="E" {% if selected.q1_1 == 'E' %}checked{% endif %}>友達や同僚と過ごしてリラックスする<br>
+            <input type="radio" name="q1-2" value="I" {% if selected.q1_2 == 'I' %}checked{% endif %}>一人の時間を大切にしてリラックスする<br>
+          </p>
+        </div>
+        <div id="q2">
+          <p>夢を見ました。どんな夢？<br>
+            <input type="radio" name="q2-1" value="S" {% if selected.q2_1 == 'S' %}checked{% endif %}>仕事や勉強がうまく行く夢<br>
+            <input type="radio" name="q2-1" value="N" {% if selected.q2_2 == 'N' %}checked{% endif %}>空を飛ぶ夢<br>
+          </p>
+          <p>旅行に行くなら...<br>
+            <input type="radio" name="q2-2" value="S" {% if selected.q2_1 == 'S' %}checked{% endif %}>予算やスケジュールを綿密に決める<br>
+            <input type="radio" name="q2-2" value="N" {% if selected.q2_2 == 'N' %}checked{% endif %}>当日の気分や雰囲気にあわせる<br>
+          </p>
+        </div>
+        <div id="q3">
+          <p>親を説得するとき、どうする？<br>
+            <input type="radio" name="q3-1" value="T" {% if selected.q3_1 == 'T' %}checked{% endif %}>計画やデータを示して説得する<br>
+            <input type="radio" name="q3-1" value="F" {% if selected.q3_2 == 'F' %}checked{% endif %}>わかって欲しい自分の気持ちを素直に話す<br>
+          </p>
+          <p>友達が喧嘩したら、どうする？<br>
+            <input type="radio" name="q3-2" value="T" {% if selected.q3_1 == 'T' %}checked{% endif %}>積極的に議論に参加して解決策を探す<br>
+            <input type="radio" name="q3-2" value="F" {% if selected.q3_2 == 'F' %}checked{% endif %}>喧嘩して欲しくないので、両者の話を聞いて平和的な解決を目指す<br>
+          </p>
+        </div>
+        <div id="q4">
+          <p>待ち合わせであなたは...<br>
+            <input type="radio" name="q4-1" value="P" {% if selected.q4_1 == 'P' %}checked{% endif %}>余裕を持って早めに到着できるようにする<br>
+            <input type="radio" name="q4-1" value="J" {% if selected.q4_2 == 'J' %}checked{% endif %}>約束の時間に遅れない程度にゆっくり到着する<br>
+          </p>
+          <p>新しいことを始めるとき...<br>
+            <input type="radio" name="q4-2" value="P" {% if selected.q4_1 == 'P' %}checked{% endif %}>とにかくやってみる！<br>
+            <input type="radio" name="q4-2" value="J" {% if selected.q4_2 == 'J' %}checked{% endif %}>じっくり調べてから始める<br>
+          </p>
+        </div>
+        <div id="input_job">
+          <input type="text" name="user_job" placeholder="なりたい職業" maxlength="10">
+        </div>
+        <div id="btn1">
+          <button type="submit" name="action" value="scenario_gen" value id="quiz-submit">MBTIを診断、シナリオを生成</button>
+        </div>
+      </form>
+    </div>
+
+
+
+
+    <!--
     <form method="POST" action="{% url 'index' %}">
       {% csrf_token %}
       <input type="text" name="job" placeholder="なりたい職業" maxlength="10">
       <input type="text" name="mbti" placeholder="あなたのMBTI" maxlength="5">
       <button type="submit">シナリオを生成する</button>
     </form>
-    {% if user_scenario %}
-      <h3>あなたのシナリオ</h3>
-      <p>{{ user_scenario }}</p>
+    -->
+    <div id="mbti_area">
+      {% if user_mbti %}
+      <h3>あなたのMBTI</h3>
+      <p>{{ user_mbti }} ({{ user_type }})</p>
     {% endif %}
+    <div>
+    <div id="scenario_area">
+      {% if user_scenario %}
+        <h3>あなたのシナリオ</h3>
+        <p>{{ user_scenario }}</p>
+      {% endif %}
+    </div>
+
   </body>
 
 </html>
