@@ -20,131 +20,106 @@ def index(request):
         temperature=0
     )
     
-    params = {}
+    params = {} #htmlに渡すデータ
     
-    selected = { #デフォルトで選択されている選択肢
-        "q1_1": "E",
-        "q1_2": "E",
-        "q2_1": "S",
-        "q2_2": "S",
-        "q3_1": "T",
-        "q3_2": "T",
-        "q4_1": "P",
-        "q4_2": "P",
-    }
-    
-    result_user_mbti = ""
+    user_mbti = ""
     #mbti診断
-    if request.method == 'POST':
-        action = request.POST.get('action')
-        if action == "scenario_gen":
-            #ユーザの解答結果を得る
-            q11_ans = request.POST.get("q1-1", "E")
-            q12_ans = request.POST.get("q1-2", "E")
-            q21_ans = request.POST.get("q2-1", "S")
-            q22_ans = request.POST.get("q2-2", "S")
-            q31_ans = request.POST.get("q3-1", "T")
-            q32_ans = request.POST.get("q3-2", "T")
-            q41_ans = request.POST.get("q4-1", "P")
-            q42_ans = request.POST.get("q4-2", "P")
-            
-            #ラジオボタンの選択を保存
-            selected["q1_1"] = q11_ans
-            selected["q1_2"] = q12_ans
-            selected["q2_1"] = q21_ans
-            selected["q2_2"] = q22_ans
-            selected["q3_1"] = q31_ans
-            selected["q3_2"] = q32_ans
-            selected["q4_1"] = q41_ans
-            selected["q4_2"] = q42_ans
-            
-        
-            #アルファベットを01の数値に変換
-            q11 = 1 if q11_ans == 'E' else 0
-            q12 = 1 if q12_ans == 'E' else 0
-            q21 = 1 if q21_ans == 'S' else 0
-            q22 = 1 if q22_ans == 'S' else 0
-            q31 = 1 if q31_ans == 'T' else 0
-            q32 = 1 if q32_ans == 'T' else 0
-            q41 = 1 if q41_ans == 'P' else 0
-            q42 = 1 if q42_ans == 'P' else 0
-
-        
-            tmp_user_mbti = 0 #MBTIの結果
-        
-            if ((q11 & q12) != 0):
-                tmp_user_mbti |= (1<<3)
-            if ((q21 & q22) != 0):
-                tmp_user_mbti |= (1<<2)
-            if ((q31 & q32) != 0):
-                tmp_user_mbti |= (1<<1)
-            if ((q41 & q42) != 0):
-                tmp_user_mbti |= (1<<0)
-                
-            print("debag: ", bin(tmp_user_mbti))
-
-            #結果からmbtiを診断する
-            for i in range(3, -1, -1):
-                if (i == 3):
-                    if ((tmp_user_mbti) & (1<<i) != 0):
-                        result_user_mbti += "E"
-                    else:
-                        result_user_mbti += "I"
-                elif (i == 2):
-                    if ((tmp_user_mbti) & (1<<i) != 0):
-                        result_user_mbti += "S"
-                    else:
-                        result_user_mbti += "N"
-                elif (i == 1):
-                    if ((tmp_user_mbti) & (1<<i) != 0):
-                        result_user_mbti += "T"
-                    else:
-                        result_user_mbti += "F"
-                elif (i == 0):
-                    if ((tmp_user_mbti) & (1<<i) != 0):
-                        result_user_mbti += "P"
-                    else:
-                        result_user_mbti += "J"
+    if request.method == "POST":    
+        if request.POST.get("action") == "mbti_gen":
+            question_names = { #クイズの回答
+                'e_or_i_0': 0, 'e_or_i_1': 0, 'e_or_i_2': 0, 'e_or_i_3': 0,
+                's_or_n_0': 0, 's_or_n_1': 0, 's_or_n_2': 0, 's_or_n_3': 0,
+                't_or_f_0': 0, 't_or_f_1': 0, 't_or_f_2': 0, 't_or_f_3': 0,
+                'p_or_j_0': 0, 'p_or_j_1': 0, 'p_or_j_2': 0, 'p_or_j_3': 0
+            }
+            result_e_or_i = 0
+            result_s_or_n = 0
+            result_t_or_f = 0
+            result_p_or_j = 0
+            for n in list(question_names): #辞書型のquestion_namesからキーだけ取得
+                question_names[n] = int(request.POST.get(n, 0))
+            for eval in list(question_names):
+                if eval.startswith('e'):
+                    result_e_or_i += question_names[eval]
+                elif eval.startswith('s'):
+                    result_s_or_n += question_names[eval]
+                elif eval.startswith('t'):
+                    result_t_or_f += question_names[eval]
+                else:
+                    result_p_or_j += question_names[eval]
                     
+            if result_e_or_i >= 0:
+                user_mbti += 'E'
+            else:
+                user_mbti += 'I'
+                
+            if result_s_or_n >= 0:
+                user_mbti += 'S'
+            else:
+                user_mbti += 'N'
+                
+            if result_t_or_f >= 0:
+                user_mbti += 'T'
+            else:
+                user_mbti += 'F'
+                
+            if result_p_or_j >= 0:
+                user_mbti += 'P'
+            else:
+                user_mbti += 'J'
+                
             user_type = ""
-            if (result_user_mbti == "INTJ"):
+            if (user_mbti == "INTJ"):
                 user_type = "建築家"
-            elif (result_user_mbti == "INTP"):
+            elif (user_mbti == "INTP"):
                 user_type = "論理学者"
-            elif (result_user_mbti == "ENTJ"):
+            elif (user_mbti == "ENTJ"):
                 user_type = "指揮官"
-            elif (result_user_mbti == "ENTP"):
+            elif (user_mbti == "ENTP"):
                 user_type = "討論者"
-            elif (result_user_mbti == "INFJ"):
+            elif (user_mbti == "INFJ"):
                 user_type = "提唱者"
-            elif (result_user_mbti == "INFP"):
+            elif (user_mbti == "INFP"):
                 user_type = "仲介者"
-            elif (result_user_mbti == "ENFJ"):
+            elif (user_mbti == "ENFJ"):
                 user_type = "主人公"
-            elif (result_user_mbti == "ENFP"):
+            elif (user_mbti == "ENFP"):
                 user_type = "運動家"
-            elif (result_user_mbti == "ISTJ"):
+            elif (user_mbti == "ISTJ"):
                 user_type = "管理者"
-            elif (result_user_mbti == "ISFJ"):
+            elif (user_mbti == "ISFJ"):
                 user_type = "擁護者"
-            elif (result_user_mbti == "ESTJ"):
+            elif (user_mbti == "ESTJ"):
                 user_type = "幹部"
-            elif (result_user_mbti == "ESFJ"):
+            elif (user_mbti == "ESFJ"):
                 user_type = "領事"
-            elif (result_user_mbti == "ISTP"):
+            elif (user_mbti == "ISTP"):
                 user_type = "巨匠"
-            elif (result_user_mbti == "ISFP"):
+            elif (user_mbti == "ISFP"):
                 user_type = "冒険家"
-            elif (result_user_mbti == "ESTP"):
+            elif (user_mbti == "ESTP"):
                 user_type = "起業家"
-            elif (result_user_mbti == "ESFP"):
+            elif (user_mbti == "ESFP"):
                 user_type = "エンターテイナー"
-            
-            params["user_mbti"] = result_user_mbti
+        
+            params["user_mbti"] = user_mbti
             params["user_type"] = user_type
-            user_job = request.POST.get("user_job")    
-            message = [HumanMessage(content=f"ユーザのmbtiは{result_user_mbti}だそうです。そんな性格のユーザは将来{user_job}になりたいと思っています。ユーザが将来{user_job}に就いた際のシナリオを作成してください。")]
-            result = chat(message)
+        if request.POST.get("action") == "scenario_gen":
+            user_job = request.POST.get("user_job")
+            intro = [HumanMessage(content="""
+            あなたは占い師です。 
+            ユーザが自身の性格を意味するMBTIと将来なりたい職業をあなたに相談します。
+            それらの情報からユーザが将来その職業に就いたときどうなるのか占い、そのシナリオを作成してください。
+            シナリオは以下の形式で、ユーザにとってためになるものであり、読みやすくまとめられていて、読んでいて面白いものにしてください。
+            [ユーザの適正具合の占い結果]
+            [ユーザがその仕事に就いた時うまくいくこと、苦労すること]
+            [ユーザがその仕事についた時、どのようなスケジュールの一日を過ごすか]
+            [最後に、あなたが占い師としてユーザに伝えたいこと]
+            """)]
+  
+            message = [HumanMessage(content=f"ユーザのmbtiは{user_mbti}だそうです。そんな性格のユーザは将来{user_job}になりたいと思っています。ユーザが将来{user_job}に就いた際のシナリオを作成してください。")]
+            result = chat(intro + message)
             params["user_scenario"] = result.content
-            
+            params["precaution"] = "#キャラ名#さんは気まぐれです。占い結果に当たり外れがあります。あくまで参考程度にお読みください。"
+        
     return render(request, 'scenario/top_page.html', params)
