@@ -110,16 +110,21 @@ def index(request):
             あなたは占い師です。 
             ユーザが自身の性格を意味するMBTIと将来なりたい職業をあなたに相談します。
             それらの情報からユーザが将来その職業に就いたときどうなるのか占い、そのシナリオを作成してください。
-            シナリオは以下の形式で、ユーザにとってためになるものであり、読みやすくまとめられていて、読んでいて面白いものにしてください。
-            [ユーザの適正具合の占い結果]
-            [ユーザがその仕事に就いた時うまくいくこと、苦労すること]
-            [ユーザがその仕事についた時、どのようなスケジュールの一日を過ごすか]
-            [最後に、あなたが占い師としてユーザに伝えたいこと]
+            シナリオは以下の内容を含み、ユーザにとってためになるものであり、読みやすくまとめられていて、読んでいて面白いものにしてください。
+            1. ユーザはその仕事に向いているのかどうか
+            2. ユーザがその仕事に就いた時うまくいくこと、苦労すること
+            3. ユーザがその仕事についた時、どのようなスケジュールの一日を過ごすか、出勤時間~退勤時間、残されたプライベートの時間
+            4. 最後に、あなたが占い師としてユーザに伝えたいこと
             """)]
-  
+            user_mbti = request.POST.get("user_mbti", "")
+            user_type = request.POST.get("user_type", "")
+            params["user_mbti"] = user_mbti
+            params["user_type"] = user_type
+            
             message = [HumanMessage(content=f"ユーザのmbtiは{user_mbti}だそうです。そんな性格のユーザは将来{user_job}になりたいと思っています。ユーザが将来{user_job}に就いた際のシナリオを作成してください。")]
             result = chat(intro + message)
-            params["user_scenario"] = result.content
+            arranged_result = (result.content).replace("。", "。\n")
+            params["user_scenario"] = arranged_result
             params["precaution"] = "#キャラ名#さんは気まぐれです。占い結果に当たり外れがあります。あくまで参考程度にお読みください。"
         
     return render(request, 'scenario/top_page.html', params)
