@@ -1,0 +1,89 @@
+.page_all {
+    background-color: #FFFFF0; /* 背景色をページ全体に適用 */
+    width: 100%; /* 横幅を全体に設定 */
+    min-height: 100vh; /* 縦幅をビューポート全体に設定 */
+    display: flex;
+    flex-direction: column;
+    /*justify-content: center;  縦方向に中央揃え */
+    /*align-items: center;  横方向に中央揃え */
+    padding: 20px; /* ページ全体の余白 */
+}
+.app_name {
+    font-family: "Hiragino Sans";
+    font-weight: 600;
+    font-size: 60px;
+}
+
+#text1, #text2, #cat1 {
+    opacity: 0;
+    transition: opacity 2s ease-in-out;
+}
+
+
+.says {
+    font-weight: 600;
+    font-family: 'Hiragino Sans';
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    margin-left: 15px;
+    padding: .8em 1.2em;
+    border-radius: 5px;
+    background-color: #D2E0FB;
+    color: #333333;
+}
+
+.says::before {
+    position: absolute;
+    right: -15px;
+    width: 15px;
+    height: 30px;
+    background-color: #D2E0FB;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    content: '';
+}
+
+.tobe {
+    font-size: 20px;
+}
+
+#cat1 {
+    width: 50%;
+}
+#cat2 {
+    width: 50%;
+}
+.select_qs {
+    padding: 20px;
+}
+.input_job {
+    padding: 20px;
+}
+
+.scenario_area {
+    padding: 20px;
+}
+
+.explain {
+    font-family: "Hiragino Sans";
+    font-weight: 600;
+    font-size: 20px;
+}
+
+.mbti_area {
+    padding: 20px;
+}
+
+#your_mbti {
+    font-weight: 600;
+    font-size: 32px;
+    font-family: "Hiragino Sans";
+}
+
+#mbti_result {
+    font-weight: 600;
+    font-size: 32px;
+    font-family: "Hiragino Sans";
+}

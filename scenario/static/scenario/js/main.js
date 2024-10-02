@@ -1,3 +1,22 @@
+function appear_intro() {
+    // フェードイン済みかを確認する
+    if (!localStorage.getItem('introAppeared')) {
+      setTimeout(function() {
+        document.getElementById('text1').style.opacity = '1';
+        document.getElementById('text2').style.opacity = '1';
+        document.getElementById('cat1').style.opacity = '1';
+        // フェードイン済みを記録する
+        localStorage.setItem('introAppeared', 'true');
+      }, 3000); // 3秒後にフェードイン
+    } else {
+      // フェードイン済みの場合、すぐに表示する
+      document.getElementById('text1').style.opacity = '1';
+      document.getElementById('text2').style.opacity = '1';
+      document.getElementById('cat1').style.opacity = '1';
+    }
+  }
+
+
 const questions = {
     e_or_i: [
         "人から注目されるのが好きだ",

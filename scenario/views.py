@@ -1,29 +1,70 @@
 from django.conf import settings
-from django.shortcuts import render
-#from langchain.agents import Tool, initialize_agent, AgentType
+from django.shortcuts import render, redirect
+from django.http import Http404
+from django.utils import timezone
+from scenario.models import Scenario
+from langchain import PromptTemplate
 from langchain.chat_models import ChatOpenAI
-from langchain.schema import  HumanMessage #, AIMessage, SystemMessage
+from langchain import LLMChain
+from langchain.document_loaders import PyPDFLoader 
+from langchain.document_loaders import TextLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.vectorstores import Chroma
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
 import requests
 
 import os
 
 
 # Create your views here.
+def title(request):
+    return render(request, "scenario/title.html")
+
+def format_docs(docs):
+    return "\n\n".join([d.page_content for d in docs])
+
 def index(request):
     # 環境変数
     openai_api_key = settings.OPENAI_API_KEY
     openai_api_base = settings.OPENAI_API_BASE
     
-    chat = ChatOpenAI(
+    # ChatOpenAIクラスのインスタンスを作成
+    llm = ChatOpenAI(
         openai_api_key=openai_api_key,
         openai_api_base=openai_api_base,
+        model_name="gpt-4o-mini",
         temperature=0
     )
     
-    params = {} #htmlに渡すデータ
+    # OpenAI埋め込みモデルのインスタンスを作成
+    embeddings_model = OpenAIEmbeddings(
+        openai_api_base=openai_api_base
+    )
     
-    user_mbti = ""
+    # テキストを読み込み、猫語を学習
+    loader = TextLoader("scenario/learn_16personalities.txt")
+    text = "\n".join([pages.page_content for pages in loader.load()])
+    
+    # テキストをチャンクに分割
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=512,
+        chunk_overlap=20,
+        length_function=len,
+        add_start_index=True
+    )
+    documents = text_splitter.create_documents([text])
+
+    # ベクトル化してChromaDBに保存
+    db = Chroma.from_documents(documents, embeddings_model)
+    retriever = db.as_retriever(search_kwargs={"k": 3})
+    
+    params = {} #テンプレートに渡すデータ
+    
     #mbti診断
+    user_mbti = "" #mbtiの診断結果を格納していく
     if request.method == "POST":    
         if request.POST.get("action") == "mbti_gen":
             question_names = { #クイズの回答
@@ -68,7 +109,7 @@ def index(request):
             else:
                 user_mbti += 'J'
                 
-            user_type = ""
+            user_type = "" #MBTIから役職を算出
             if (user_mbti == "INTJ"):
                 user_type = "建築家"
             elif (user_mbti == "INTP"):
@@ -105,26 +146,58 @@ def index(request):
             params["user_mbti"] = user_mbti
             params["user_type"] = user_type
         if request.POST.get("action") == "scenario_gen":
+            # シナリオ生成処理
             user_job = request.POST.get("user_job")
-            intro = [HumanMessage(content="""
-            あなたは占い師です。 
-            ユーザが自身の性格を意味するMBTIと将来なりたい職業をあなたに相談します。
-            それらの情報からユーザが将来その職業に就いたときどうなるのか占い、そのシナリオを作成してください。
-            シナリオは以下の内容を含み、ユーザにとってためになるものであり、読みやすくまとめられていて、読んでいて面白いものにしてください。
-            1. ユーザはその仕事に向いているのかどうか
-            2. ユーザがその仕事に就いた時うまくいくこと、苦労すること
-            3. ユーザがその仕事についた時、どのようなスケジュールの一日を過ごすか、出勤時間~退勤時間、残されたプライベートの時間
-            4. 最後に、あなたが占い師としてユーザに伝えたいこと
-            """)]
             user_mbti = request.POST.get("user_mbti", "")
             user_type = request.POST.get("user_type", "")
+            
+            template = """
+                あなたは猫の占い師です。
+                あなたはユーザの性格を表すMBTIとユーザが将来なりたい職業が与えられます。
+                ユーザが将来、その職業についた際のシナリオを作成してください。
+                シナリオは以下のコンテンツを含めてください。
+                1. ユーザはその仕事に向いているか
+                2. ユーザがその仕事に就いた際にうまくいくこと、苦労すること
+                3. ユーザがその仕事に就いた際の、起床から就寝までの1日のスケジュール
+                4. 最後に、あなたが占い師としてユーザに伝えたいこと
+                なお、シナリオは上記の1. ~ 4.について、1.、2.、3.、4.から始めてください。
+                また、ユーザのことは"キミ"として、語尾は猫のように"ニャン"としてください。
+                
+                以下のcontextには、MBTIの詳細な情報が含まれていますので、必要であれば参考にしてください。
+                {context}
+                
+                ユーザ: {question}
+            """
+            prompt = ChatPromptTemplate.from_template(template)
+            chain = (
+                {"context": retriever | format_docs, "question": RunnablePassthrough()}
+                | prompt
+                | llm
+                | StrOutputParser(verbose=True)
+            )
+            
+            input = f"ユーザのmbtiは{user_mbti}だそうです。そんな性格のユーザは将来{user_job}になりたいと思っています。ユーザが将来{user_job}に就いた際のシナリオを作成してください。"
+            output_by_retriever = chain.invoke(input)
+
+            # 結果を保存
             params["user_mbti"] = user_mbti
             params["user_type"] = user_type
-            
-            message = [HumanMessage(content=f"ユーザのmbtiは{user_mbti}だそうです。そんな性格のユーザは将来{user_job}になりたいと思っています。ユーザが将来{user_job}に就いた際のシナリオを作成してください。")]
-            result = chat(intro + message)
-            arranged_result = (result.content).replace("。", "。\n")
-            params["user_scenario"] = arranged_result
+            params["user_scenario"] = output_by_retriever
             params["precaution"] = "#キャラ名#さんは気まぐれです。占い結果に当たり外れがあります。あくまで参考程度にお読みください。"
-        
-    return render(request, 'scenario/top_page.html', params)
+            
+            user_data = Scenario(job=user_job, mbti=user_mbti, scenario=str(output_by_retriever))
+            user_data.save()
+            return redirect('output', scenario_id=user_data.id)
+    
+    params["scenarios"] = Scenario.objects.all()
+    return render(request, 'scenario/main_page.html', params)
+
+def result(request, scenario_id):
+    try:
+        scenario = Scenario.objects.get(pk=scenario_id)
+    except Scenario.DoesNotExist:
+        raise Http404("Scenario does not exist")
+    context = {
+        'scenario_data': scenario
+    }
+    return render(request, "scenario/scenario.html", context)

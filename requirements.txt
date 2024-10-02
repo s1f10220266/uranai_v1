@@ -4,3 +4,13 @@ uvicorn
 langchain
 openai
 langchain_community
+chromadb
+tiktoken
+# langchain.chat_models
+# langchain.document_loaders
+# langchain.text_splitter
+# langchain.embeddings.openai
+# langchain.vectorstores
+# langchain_core.prompts
+# langchain_core.output_parsers
+# langchain_core.runnables
