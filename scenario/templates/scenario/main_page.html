@@ -12,7 +12,7 @@
   <body onload="appear_intro()">
     <div class="container-fluid page_all">
         <div class="row text-center">
-          <div class="col app_name">UranAI</div>
+          <div class="col app_name">URAN<span class="AI_color">AI</span></div>
         </div>
       <hr>
 
@@ -20,7 +20,7 @@
         <div class="offset-3 col-4 text-center">
             <p id="text1" class="says">
               ようこそ〜<br>
-              ここはUranAIの館だニャン~
+              ここはURANAIの館だニャン~
             </p>
             <p id="text2" class="says">キミの将来を占うニャン〜</p>
         </div>
@@ -31,11 +31,11 @@
 
       <div class="row text-center">
         <div class="col">
-          <p class="explain">MBTI診断を始めましょう！</p>
+          <p class="explain">性格診断を始めましょう！</p>
           <p class="explain">質問数を選択してください</p>
         </div>
       </div>
-
+      <a href="{% url 'waiting' %}">TMP</a>
       <div class="row text-center">
         <div class="col-12 text-center">
           <div class="btn-group" role="group" aria-label="Button group example">
@@ -59,8 +59,8 @@
           <div class="row justify-content-center">
             <div class="col text-center mbti_area">
               {% if user_mbti %}
-              <h3 id="your_mbti">あなたのMBTI</h3>
-              <p id="mbti_result">{{ user_mbti }} ({{ user_type }})</p>
+              <h3 id="your_mbti">あなたの性格</h3>
+              <p id="mbti_result">{{ user_mbti }}</p>
               {% endif %}
             </div>
           </div>

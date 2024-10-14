@@ -8,10 +8,15 @@
     /*align-items: center;  横方向に中央揃え */
     padding: 20px; /* ページ全体の余白 */
 }
+
 .app_name {
     font-family: "Hiragino Sans";
     font-weight: 600;
     font-size: 60px;
+}
+
+.AI_color {
+    color: #afd147;
 }
 
 #text1, #text2, #cat1 {

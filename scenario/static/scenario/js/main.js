@@ -78,7 +78,7 @@ function generateQuestions(selectedNum) {
     btnDiv.className = "row justify-content-center mbti_btn";
     btnDiv.innerHTML = `
     <div class="col text-center">
-        <button class="btn btn-outline-primary mbti_btn" type="submit" name="action" value="mbti_gen">MBTIを診断する</button>
+        <button class="btn btn-outline-primary mbti_btn" type="submit" name="action" value="mbti_gen">性格をチェックする</button>
     </div>`;
     buttonArea.appendChild(btnDiv);
 }

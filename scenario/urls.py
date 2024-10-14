@@ -5,4 +5,5 @@ urlpatterns = [
     path('', views.title, name='title'),
     path('main', views.index, name='index'),
     path('output/<int:scenario_id>', views.result, name='output'),
+    path('predicting', views.waiting, name="waiting")
 ]
